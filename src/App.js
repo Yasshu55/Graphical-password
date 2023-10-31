@@ -9,6 +9,7 @@ import {
   Route, 
   Navigate, 
 } from "react-router-dom"; 
+import Dashboard from "./components/Dashboard";
 
 function App() {
 
@@ -18,8 +19,10 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/" element={<Navigate to="/home" />} />
           <Route path="/home" element={<Home />} />
+
         </Routes>
       </Router>    
     </div>

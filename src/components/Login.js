@@ -17,38 +17,38 @@ function Login() {
     if (array1.length !== array2.length) {
       return false;
     }
-  
+
     for (let i = 0; i < array1.length; i++) {
       if (array1[i] !== array2[i]) {
         return false;
       }
     }
-  
+
     return true;
   };
 
-  const [isNext,setIsNext] = useState(false);
-  const [username, setUsername] = useState('');
-  const [selectedImages, setSelectedImages] = useState([]); // Initialize as an empty array
+  const [isNext, setIsNext] = useState(false);
+  const [email, setUsername] = useState('');
+  const [selectedImages, setSelectedImages] = useState([]);
   const [selectedPatterns, setSelectedPatterns] = useState([null, null, null]);
   const [selectedGrids, setSelectedGrids] = useState([null, null, null]);
-  const [currentLayer, setCurrentLayer] = useState(0); // Track the current layer
-  const imageLayers = [
+  const [currentLayer, setCurrentLayer] = useState(0);
+  const [imageLayers,setImageLayers] = useState([
     [img1, img2, img3, img4, img5, img6, img7, img8, img9], // Layer 1
     [img1, img2, img3, img4, img5, img6, img7, img8, img9], // Layer 2
     [img1, img2, img3, img4, img5, img6, img7, img8, img9], // Layer 3
-  ];
-  
+  ]);
+
   const [isPass, setIsPass] = useState(false);
   const [isGridSelection, setIsGridSelection] = useState(false);
   const navigate = useNavigate();
 
   const handleImageSelection = (layerIndex, imageIndex) => {
     const newSelectedImages = [...selectedImages];
-    const imagePath = imageLayers[layerIndex][imageIndex]; // Get the selected image path
+    const imagePath = imageLayers[layerIndex][imageIndex];
     newSelectedImages[layerIndex] = imagePath;
     setSelectedImages(newSelectedImages);
-  
+
     const selectedImage = new Image();
     selectedImage.src = imagePath;
     selectedImage.onload = () => {
@@ -57,20 +57,18 @@ function Login() {
       setIsGridSelection(true);
     };
   };
-  
 
   const handleGridSelection = (grid) => {
     if (isGridSelection) {
       selectedPatterns[currentLayer] = grid.pattern;
       setIsGridSelection(false);
 
-      // If patterns are selected for all three layers, allow moving to the next layer
       if (currentLayer < 2) {
         setCurrentLayer(currentLayer + 1);
-        setSelectedImages([...selectedImages, null]); // Add a placeholder for the next layer
+        setSelectedImages([...selectedImages, null]);
         setSelectedGrids([...selectedGrids, null]);
       } else {
-        setIsPass(true); // Show submit button
+        setIsPass(true);
       }
     }
   };
@@ -104,32 +102,51 @@ function Login() {
     return grids;
   };
 
-  const handleNext = (e) =>{
+  const handleNext = (e) => {
     e.preventDefault();
+  
+    // Shuffle the imageLayers array
+    const shuffledImageLayers = imageLayers.map((layer) => shuffleArray(layer));
+  
+    setImageLayers(shuffledImageLayers);
     setIsNext(true);
-  }
+  };
+  
+  const shuffleArray = (array) => {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+  };
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const inputData = {
-      username,
+      username: email,
       selectedImages,
-      selectedPatterns
+      selectedPatterns,
     };
-  
+
     try {
       // Replace the following code with your logic for checking user credentials
       const storedUserData = JSON.parse(localStorage.getItem('userData'));
-  
-      if (storedUserData && 
-          storedUserData.firstName === username &&
-          compareArrays(storedUserData.selectedImages, selectedImages) &&
-          compareArrays(storedUserData.selectedPatterns, selectedPatterns)) {
+
+      if (
+        storedUserData &&
+        storedUserData.email === email &&
+        compareArrays(storedUserData.selectedImages, selectedImages) &&
+        compareArrays(storedUserData.selectedPatterns, selectedPatterns)
+      ) {
         console.log('Login successful');
-        navigate('/Dashboard');
+        navigate('/dashboard');
         // You can add code to navigate to the home page here
       } else {
         console.error('Invalid login credentials. Please try again.');
-        navigate('/Dashboard');
+        alert("Invalid login credentials. Please try again.😔 😔 ")
+        navigate('/');
         // You can display an error message to the user or handle the error as needed
       }
     } catch (error) {
@@ -137,7 +154,6 @@ function Login() {
       // Handle the error as needed
     }
   };
-  
 
   return (
     <div className="login-container">
@@ -150,7 +166,7 @@ function Login() {
             name="username"
             id="username"
             onChange={(e) => setUsername(e.target.value)}
-            value={username}
+            value={email}
           />
         </div>
         <button onClick={handleNext}>Next</button>
@@ -184,8 +200,6 @@ function Login() {
             )}
           </div>
         )}
-
-        {/* Render the submit button if all layers are done */}
         {isPass && (
           <button type="submit" onClick={handleSubmit}>
             Submit

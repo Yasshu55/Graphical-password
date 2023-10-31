@@ -10,6 +10,7 @@ import img6 from '../assets/img6.jpg';
 import img7 from '../assets/img7.jpg';
 import img8 from '../assets/img8.jpg';
 import img9 from '../assets/img9.jpg';
+import { useNavigate } from 'react-router-dom';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -24,11 +25,11 @@ function Register() {
   const [selectedPatterns, setSelectedPatterns] = useState([null, null, null]);
   const [selectedGrids, setSelectedGrids] = useState([null, null, null]);
   const [currentLayer, setCurrentLayer] = useState(0); // Track the current layer
-  const imageLayers = [
+  const [imageLayers,setImageLayers] = useState([
     [img1, img2, img3, img4, img5, img6, img7, img8, img9], // Layer 1
     [img1, img2, img3, img4, img5, img6, img7, img8, img9], // Layer 2
     [img1, img2, img3, img4, img5, img6, img7, img8, img9], // Layer 3
-  ];
+  ]);
   const [isPass, setIsPass] = useState(false);
   const [isGridSelection, setIsGridSelection] = useState(false);
   const squarePatterns = [
@@ -104,6 +105,7 @@ function Register() {
       [name]: value,
     });
   };
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,8 +120,8 @@ function Register() {
       localStorage.setItem('userData', JSON.stringify(userData));
       
       console.log('Data sent to the server:', userData);
-      // Uncomment the following line to send data to the backend
       // const response = await axios.post('your-backend-api-endpoint', userData);
+      // navigate("/Home")
     } catch (error) {
       console.error('Error sending data to the server:', error);
     }
@@ -128,8 +130,23 @@ function Register() {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
+  
+    // Shuffle the imageLayers array
+    const shuffledImageLayers = imageLayers.map((layer) => shuffleArray(layer));
+  
+    setImageLayers(shuffledImageLayers);
     setIsPass(true);
   };
+  
+  const shuffleArray = (array) => {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+  };
+  
 
   return (
     <div className="register-container">
